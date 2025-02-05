@@ -1,23 +1,22 @@
-export default async function handler(req, res) {
-    const targetUrl = req.query.url;
+import { useEffect } from "react";
 
-    if (!targetUrl) {
-        return res.status(400).json({ error: "Missing URL parameter" });
-    }
-
-    try {
-        const response = await fetch(targetUrl, {
-            method: req.method,
-            headers: {
-                ...req.headers,
-                host: new URL(targetUrl).host // Preserve original host
+export default function Home() {
+    useEffect(() => {
+        document.querySelectorAll("a").forEach(link => {
+            if (link.href.startsWith("http")) {
+                link.href = `/api/proxy?url=${encodeURIComponent(link.href)}`;
             }
         });
+    }, []);
 
-        const contentType = response.headers.get("content-type");
-        res.setHeader("content-type", contentType);
-        res.status(response.status).send(await response.text());
-    } catch (error) {
-        res.status(500).json({ error: "Failed to fetch the page" });
-    }
+    return (
+        <div>
+            <h1>Google Cloud Console Proxy</h1>
+            <iframe
+                src="/api/proxy?url=https://console.cloud.google.com/"
+                width="100%"
+                height="800px"
+            ></iframe>
+        </div>
+    );
 }
